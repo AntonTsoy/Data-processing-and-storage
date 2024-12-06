@@ -28,13 +28,13 @@ public class Philosopher implements Runnable {
         try {
             startBarrier.await();
             while (mealPortion > 0) {
-                stupidEating();
+                usualEating();
             }
         } catch (BrokenBarrierException e) {
             System.out.println(Thread.currentThread() + " failed to start");
-        } catch (DeadlockException e) {
+        } /*catch (DeadlockException e) {
             System.out.println(Thread.currentThread() + " has caught deadlock");
-        } catch (InterruptedException e) {
+        }*/ catch (InterruptedException e) {
             System.out.println(Thread.currentThread() + " was interrupted");
         }
     }
@@ -53,9 +53,6 @@ public class Philosopher implements Runnable {
         Thread.sleep(eatingTime);
         mealPortion -= eatingTime;
         rightFork.put();
-        if (mealPortion <= 0) {
-            System.out.println(Thread.currentThread() + " end of eating");
-        }
         leftFork.put();
     }
 

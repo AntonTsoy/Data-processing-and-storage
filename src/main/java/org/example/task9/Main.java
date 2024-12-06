@@ -18,10 +18,12 @@ public class Main {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             philosophersThreads.forEach(Thread::interrupt);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                System.err.println("Interruption was interrupted");
+            for (Thread philosophersThread : philosophersThreads) {
+                try {
+                    philosophersThread.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }));
     }
