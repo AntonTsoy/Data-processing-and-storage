@@ -7,7 +7,6 @@ import java.util.concurrent.Semaphore;
 public class ReaderWriter {
     private static final CountDownLatch parentStart = new CountDownLatch(1);
     private static final Semaphore mutex = new Semaphore(1);
-    private static final Object cond = new Object();
     private static final int cycles = 10;
 
     private static final Runnable child = () -> {
@@ -21,7 +20,7 @@ public class ReaderWriter {
             try {
                 mutex.acquire();
             } catch (InterruptedException e) {}
-            synchronized (cond) {
+            synchronized (mutex) {
                 mutex.release();
                 System.out.println("Message from CHILD " + i);
                 try {
@@ -42,7 +41,7 @@ public class ReaderWriter {
                     mutex.acquire();
                 } catch (InterruptedException e) {}
             }
-            synchronized (cond) {
+            synchronized (mutex) {
                 mutex.release();
                 System.out.println("Message from PARENT " + i);
                 try {
