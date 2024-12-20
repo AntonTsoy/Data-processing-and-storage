@@ -1,4 +1,4 @@
-package org.example.task9;
+package org.example.task13;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +20,7 @@ public class Fork {
         mutex.release();
     }
 
-    public void waitAndPick() {
-
+    public void waitAndPick() throws InterruptedException {
+        mutex.acquire();
     }
 }
