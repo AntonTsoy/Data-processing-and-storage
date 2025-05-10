@@ -9,7 +9,7 @@ public class Person {
     protected Boolean isMale;
     protected String fatherId;
     protected String motherId;
-    protected String spouseId;
+    protected String spouceId;
     protected List<String> sonsIds;
     protected List<String> daughtersIds;
     protected List<String> brothersIds;
