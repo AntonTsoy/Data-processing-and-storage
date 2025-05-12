@@ -37,6 +37,34 @@ public class PersonFragment {
         initListFields();
     }
 
+    public void mergeWith(PersonFragment other) {
+        if (other == null) return;
+
+        mergeField("id", this.id, other.id, val -> this.id = val);
+        mergeField("firstName", this.firstName, other.firstName, val -> this.firstName = val);
+        mergeField("lastName", this.lastName, other.lastName, val -> this.lastName = val);
+        mergeField("isMale", this.isMale, other.isMale, val -> this.isMale = val);
+        mergeField("spouce", this.spouce, other.spouce, val -> this.spouce = val);
+        mergeField("numberOfChildren", this.numberOfChildren, other.numberOfChildren, val -> this.numberOfChildren = val);
+        mergeField("numberOfSiblings", this.numberOfSiblings, other.numberOfSiblings, val -> this.numberOfSiblings = val);
+
+        this.parents.addAll(other.parents);
+        this.children.addAll(other.children);
+        this.siblings.addAll(other.siblings);
+    }
+
+    private <T> void mergeField(String fieldName, T current, T other, java.util.function.Consumer<T> setter) {
+        if (other == null) return;
+        if (current == null) {
+            setter.accept(other);
+        } else if (!current.equals(other)) {
+            System.out.println("Conflict in field '" + fieldName + "':");
+            System.out.println("First:  " + this);
+            System.out.println("Second: " + other);
+            throw new IllegalStateException("Conflicting field '" + fieldName + "' during merge.");
+        }
+    }
+
     /*
      * Метод, который проверяет - являются ли все публичные поля экземпляра null или пустыми коллекциями.
      */
