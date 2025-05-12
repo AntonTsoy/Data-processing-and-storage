@@ -1,5 +1,7 @@
 package depression;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PersonFragment {
@@ -14,13 +16,42 @@ public class PersonFragment {
     public Integer numberOfChildren;
     public Integer numberOfSiblings;
 
+    private void initListFields() {
+        this.parents = new ArrayList<>();
+        this.children = new ArrayList<>();
+        this.siblings = new ArrayList<>();
+    }
+
+    public PersonFragment() {
+        initListFields();
+    }
+
     public PersonFragment(String personId) {
         this.id = personId;
+        initListFields();
     }
 
     public PersonFragment(String firstName, String lastname) {
         this.firstName = firstName;
         this.lastName = lastname;
+        initListFields();
+    }
+
+    /*
+     * Метод, который проверяет - являются ли все публичные поля экземпляра null или пустыми коллекциями.
+     */
+    public boolean isEmpty() throws IllegalAccessException {
+        for (Field field : this.getClass().getFields()) {
+            Object value = field.get(this);
+            if (value instanceof List) {
+                if (!((List<?>) value).isEmpty()) {
+                    return false;
+                }
+            } else if (value != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -34,22 +65,28 @@ public class PersonFragment {
             sb.append("firstName=").append(firstName).append("; ");
         }
         if (lastName != null) {
-            sb.append("lastName=").append(firstName).append("; ");
+            sb.append("lastName=").append(lastName).append("; ");
         }
         if (isMale != null) {
             sb.append("isMale=").append(isMale).append("; ");
         }
         if (spouce != null) {
-            sb.append("spouce=").append(spouce.id).append("; ");
+            sb.append("spouce=").append(spouce).append("; ");
+        }
+        if (!parents.isEmpty()) {
+            sb.append("parents=").append(parents).append("; ");
+        }
+        if (!children.isEmpty()) {
+            sb.append("children=").append(children).append("; ");
+        }
+        if (!siblings.isEmpty()) {
+            sb.append("siblings=").append(siblings).append("; ");
         }
         if (numberOfChildren != null) {
             sb.append("numberOfChildren=").append(numberOfChildren).append("; ");
         }
         if (numberOfSiblings != null) {
             sb.append("numberOfSiblings=").append(numberOfSiblings).append("; ");
-        }
-        if (hasSpouce != null) {
-            sb.append("hasSpouce=").append(hasSpouce).append("; ");
         }
         sb.append("}");
         return sb.toString();
