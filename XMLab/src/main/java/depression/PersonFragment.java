@@ -44,7 +44,6 @@ public class PersonFragment {
         mergeField("firstName", this.firstName, other.firstName, val -> this.firstName = val);
         mergeField("lastName", this.lastName, other.lastName, val -> this.lastName = val);
         mergeField("isMale", this.isMale, other.isMale, val -> this.isMale = val);
-        mergeField("spouce", this.spouce, other.spouce, val -> this.spouce = val);
         mergeField("numberOfChildren", this.numberOfChildren, other.numberOfChildren, val -> this.numberOfChildren = val);
         mergeField("numberOfSiblings", this.numberOfSiblings, other.numberOfSiblings, val -> this.numberOfSiblings = val);
 
