@@ -5,10 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class Main {
@@ -58,6 +55,7 @@ public class Main {
         XMLParser parser = new XMLParser("people.xml");
         Map<String, PersonFragment> peopleById = new HashMap<>();
         Map<String, List<PersonFragment>> fullNamesakes = new HashMap<>();
+        Map<String, Set<String>> fullNameIds = new HashMap<>();
         PersonFragment person = parser.parsePersonFragment();
         int counterId = 0, counterName = 0;
         while (person != null) {
@@ -70,6 +68,11 @@ public class Main {
                     peopleById.put(person.id, person);
                     counterId++;
                 }
+                if (person.firstName != null && person.lastName != null) {
+                    String fullname = person.firstName + " " + person.lastName;
+                    fullNameIds.putIfAbsent(fullname, new HashSet<>());
+                    fullNameIds.get(fullname).add(person.id);
+                }
             } else {
                 String fullname = person.firstName + " " + person.lastName;
                 fullNamesakes.get(fullname);
@@ -80,19 +83,23 @@ public class Main {
             handlePersonRelatives(person);
             person = parser.parsePersonFragment();
         }
-        Map<String, List<String>> nameIds = new HashMap<>();
-        for (Map.Entry<String, PersonFragment> entry : peopleById.entrySet()) {
-            person = entry.getValue();
-            String fullname = person.firstName + " " + person.lastName;
-            nameIds.putIfAbsent(fullname, new ArrayList<>());
-            nameIds.get(fullname).add(person.id);
+        for (String fullname : fullNameIds.keySet()) {
+            if (fullNameIds.get(fullname).size() == 1 && fullNamesakes.containsKey(fullname)) {
+                for (String personId : fullNameIds.get(fullname)) {
+                    person = peopleById.get(personId);
+                    for (PersonFragment currPerson : fullNamesakes.get(fullname)) {
+                        person.mergeWith(currPerson);
+                    }
+                }
+                handlePersonRelatives(person);
+                fullNamesakes.remove(fullname);
+            }
         }
-        String filePath = "people_namesakes.txt";
+        String filePath = "people_with_name.txt";
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            for (Map.Entry<String, List<String>> entry : nameIds.entrySet()) {
-                List<String> persons = entry.getValue();
-                if (!persons.isEmpty()) {
-                    writer.println(entry.getKey() + ": " + persons);
+            for (String fullname : fullNamesakes.keySet()) {
+                for (PersonFragment currPerson : fullNamesakes.get(fullname)) {
+                    writer.println(currPerson);
                 }
             }
         } catch (IOException e) {
