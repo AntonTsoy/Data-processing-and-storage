@@ -47,6 +47,9 @@ public class PersonFragment {
         mergeField("numberOfChildren", this.numberOfChildren, other.numberOfChildren, val -> this.numberOfChildren = val);
         mergeField("numberOfSiblings", this.numberOfSiblings, other.numberOfSiblings, val -> this.numberOfSiblings = val);
 
+        if (this.spouce != null) {
+            this.spouce.mergeWith(other.spouce);
+        }
         this.parents.addAll(other.parents);
         this.children.addAll(other.children);
         this.siblings.addAll(other.siblings);

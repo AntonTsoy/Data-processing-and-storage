@@ -54,9 +54,11 @@ public class XMLParser {
             } else if ("id".equals(tag)) {
                 person.id = this.getAttribute("value");
             } else if ("children-number".equals(tag)) {
-                person.numberOfChildren = Integer.valueOf(this.getAttribute("value"));
+                String childrenSize = this.getAttribute("value");
+                if (childrenSize != null) person.numberOfChildren = Integer.valueOf(childrenSize);
             } else if ("siblings-number".equals(tag)) {
-                person.numberOfSiblings = Integer.valueOf(this.getAttribute("value"));
+                String siblingsSize = this.getAttribute("value");
+                if (siblingsSize != null) person.numberOfSiblings = Integer.valueOf(siblingsSize);
             } else if ("firstname".equals(tag) || "first".equals(tag)) {
                 person.firstName = this.getAttributeAndBody("value");
             } else if ("surname".equals(tag)) {
