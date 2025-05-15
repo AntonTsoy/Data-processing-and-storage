@@ -1,18 +1,8 @@
 PersonFragment{firstName=Kaylene; lastName=Startz; isMale=true; spouce=PersonFragment{id=P406658; isMale=false; }; }
 PersonFragment{firstName=Kaylene; lastName=Startz; isMale=false; spouce=PersonFragment{id=P411821; isMale=true; }; numberOfChildren=0; numberOfSiblings=1; }
-PersonFragment{firstName=Kaylene; lastName=Startz; numberOfSiblings=1; }
-PersonFragment{firstName=Kaylene; lastName=Startz; numberOfChildren=0; }
-PersonFragment{firstName=Kaylene; lastName=Startz; isMale=false; }
-PersonFragment{firstName=Tonya; lastName=Loschiavo; numberOfChildren=1; }
-PersonFragment{firstName=Tonya; lastName=Loschiavo; numberOfSiblings=2; }
 PersonFragment{firstName=Tonya; lastName=Loschiavo; parents=[PersonFragment{firstName=Willa; lastName=Loschiavo; isMale=false; }, PersonFragment{firstName=Billi; lastName=Loschiavo; isMale=true; }]; numberOfChildren=1; }
-PersonFragment{firstName=Tonya; lastName=Loschiavo; numberOfSiblings=3; }
-PersonFragment{firstName=Tonya; lastName=Loschiavo; isMale=true; }
 PersonFragment{firstName=Tonya; lastName=Loschiavo; isMale=true; numberOfSiblings=3; }
 PersonFragment{firstName=Tonya; lastName=Loschiavo; parents=[PersonFragment{firstName=Willa; lastName=Loschiavo; isMale=false; }]; numberOfChildren=1; numberOfSiblings=2; }
 PersonFragment{firstName=Tonya; lastName=Loschiavo; isMale=true; spouce=PersonFragment{id=P393978; isMale=false; }; }
-PersonFragment{firstName=Janeen; lastName=Robbinson; numberOfChildren=0; }
-PersonFragment{firstName=Janeen; lastName=Robbinson; numberOfSiblings=1; }
 PersonFragment{firstName=Janeen; lastName=Robbinson; siblings=[PersonFragment{firstName=Mary; lastName=Robbinson; isMale=true; }]; }
-PersonFragment{firstName=Janeen; lastName=Robbinson; isMale=false; }
 PersonFragment{firstName=Janeen; lastName=Robbinson; isMale=false; spouce=PersonFragment{id=P387094; isMale=true; }; }

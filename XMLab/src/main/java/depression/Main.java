@@ -92,6 +92,7 @@ public class Main {
             handlePersonRelatives(person);
             person = parser.parsePersonFragment();
         }
+
         for (String fullname : fullNameIds.keySet()) {
             if (fullNameIds.get(fullname).size() == 1 && fullNamesakes.containsKey(fullname)) {
                 for (String personId : fullNameIds.get(fullname)) {
@@ -104,7 +105,8 @@ public class Main {
                 fullNamesakes.remove(fullname);
             }
         }
-        String filePath = "people_with_id.txt";
+
+        /*String filePath = "people_with_id.txt";
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (String personId : peopleById.keySet()) {
                 PersonFragment currPerson = peopleById.get(personId);
@@ -112,7 +114,7 @@ public class Main {
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
-        }
+        }*/
         System.out.println(counterId + " " + counterName);
     }
 }
