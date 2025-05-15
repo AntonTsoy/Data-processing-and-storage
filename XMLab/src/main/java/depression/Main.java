@@ -106,7 +106,7 @@ public class Main {
             }
         }
 
-        /*String filePath = "people_with_id.txt";
+        String filePath = "people_with_id.txt";
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (String personId : peopleById.keySet()) {
                 PersonFragment currPerson = peopleById.get(personId);
@@ -114,7 +114,7 @@ public class Main {
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
-        }*/
+        }
         System.out.println(counterId + " " + counterName);
     }
 }
