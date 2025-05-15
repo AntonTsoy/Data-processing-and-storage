@@ -13,16 +13,25 @@ public class Main {
     private static void mergeRelatives(List<PersonFragment> persons, Integer expectedSize) {
         Map<String, PersonFragment> peopleById = new HashMap<>();
         Map<String, PersonFragment> peopleByName = new HashMap<>();
-        for (int i = 0; i < persons.size(); i++) {
-            PersonFragment person = persons.get(i);
+        while (!persons.isEmpty()) {
+            PersonFragment person = persons.getFirst();
             if (person.id != null) {
-                peopleById.putIfAbsent(person.id, person);
-                persons.remove(person);
-                i--;
+                PersonFragment relative = peopleById.get(person.id);
+                if (relative != null) {
+                    relative.mergeWith(person);
+                } else {
+                    peopleById.put(person.id, person);
+                }
             } else {
                 String fullname = person.firstName + " " + person.lastName;
-                peopleByName.putIfAbsent(fullname, person);
+                PersonFragment relative = peopleByName.get(fullname);
+                if (relative != null) {
+                    relative.mergeWith(person);
+                } else {
+                    peopleByName.put(fullname, person);
+                }
             }
+            persons.remove(person);
         }
 
         if (expectedSize != null) {
@@ -32,10 +41,10 @@ public class Main {
             if (expectedSize == 1 && peopleById.size() == 1 && peopleByName.size() == 1) {
                 PersonFragment personWithName = ((List<PersonFragment>) peopleByName.values()).getLast();
                 personWithName.mergeWith(((List<PersonFragment>) peopleById.values()).getLast());
-                persons.clear();
                 persons.add(personWithName);
             } else {
                 persons.addAll(peopleById.values());
+                persons.addAll(peopleByName.values());
             }
         }
     }
@@ -95,12 +104,11 @@ public class Main {
                 fullNamesakes.remove(fullname);
             }
         }
-        String filePath = "people_with_name.txt";
+        String filePath = "people_with_id.txt";
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            for (String fullname : fullNamesakes.keySet()) {
-                for (PersonFragment currPerson : fullNamesakes.get(fullname)) {
-                    writer.println(currPerson);
-                }
+            for (String personId : peopleById.keySet()) {
+                PersonFragment currPerson = peopleById.get(personId);
+                writer.println(currPerson);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
