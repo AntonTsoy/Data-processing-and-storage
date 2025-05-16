@@ -10,26 +10,33 @@ import java.util.*;
 public class FragmentMerger {
 
     private final XMLParser parser;
+    private final Map<String, PersonFragment> personsById;
 
     public FragmentMerger(XMLParser parser) {
         this.parser = parser;
+        this.personsById = new HashMap<>();
+    }
+
+    public void appendPersonFragment(PersonFragment person) {
+        if (person.id != null) {
+
+        }
     }
 
     public void mainMerge() throws XMLStreamException, IOException, IllegalAccessException {
-        Map<String, PersonFragment> peopleById = new HashMap<>();
         Map<String, List<PersonFragment>> fullNamesakes = new HashMap<>();
         Map<String, Set<String>> fullNameIds = new HashMap<>();
         PersonFragment person = parser.parsePersonFragment();
         int counterId = 0, counterName = 0;
         while (person != null) {
             if (person.id != null) {
-                PersonFragment targetPerson = peopleById.get(person.id);
+                PersonFragment targetPerson = personsById.get(person.id);
                 if (targetPerson != null) {
                     mergeWith(targetPerson, person);
                     person = targetPerson;
                 } else {
                     counterId++;
-                    peopleById.put(person.id, person);
+                    personsById.put(person.id, person);
                 }
                 if (person.firstName != null && person.lastName != null) {
                     String fullname = person.firstName + " " + person.lastName;
@@ -52,7 +59,7 @@ public class FragmentMerger {
         for (String fullname : fullNameIds.keySet()) {
             if (fullNameIds.get(fullname).size() == 1 && fullNamesakes.containsKey(fullname)) {
                 for (String personId : fullNameIds.get(fullname)) {
-                    person = peopleById.get(personId);
+                    person = personsById.get(personId);
                     for (PersonFragment currPerson : fullNamesakes.get(fullname)) {
                         mergeWith(person, currPerson);
                     }
@@ -60,16 +67,6 @@ public class FragmentMerger {
                 handlePersonRelatives(person);
                 fullNamesakes.remove(fullname);
             }
-        }
-
-        String filePath = "people_with_id.txt";
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            for (String personId : peopleById.keySet()) {
-                PersonFragment currPerson = peopleById.get(personId);
-                writer.println(currPerson);
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
         }
     }
 
@@ -120,6 +117,17 @@ public class FragmentMerger {
         } catch (IllegalStateException e) {
             System.out.println(e.getMessage());
             System.out.println("Person: " + person);
+        }
+    }
+
+    private void writePersonsInTxt(String filename) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+            for (String personId : personsById.keySet()) {
+                PersonFragment currPerson = personsById.get(personId);
+                writer.println(currPerson);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
