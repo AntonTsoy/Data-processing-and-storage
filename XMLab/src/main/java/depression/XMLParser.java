@@ -33,75 +33,142 @@ public class XMLParser {
         }
         return person.isEmpty() ? null : person;
     }
-    
+
     private void handleStartElement(String tag, PersonFragment person) throws XMLStreamException {
-        if ("person".equals(tag)) {
-            person.id = this.getAttribute("id");
-            String fullname = this.getAttribute("name");
-            if (fullname != null) {
-                String[] nameParts = this.stringParts(fullname);
-                person.firstName = nameParts[0];
-                person.lastName = nameParts[1];
-            }
-        } else if ("id".equals(tag)) {
-            person.id = this.getAttribute("value");
-        } else if ("children-number".equals(tag)) {
-            String childrenSize = this.getAttribute("value");
-            if (childrenSize != null) person.numberOfChildren = Integer.valueOf(childrenSize);
-        } else if ("siblings-number".equals(tag)) {
-            String siblingsSize = this.getAttribute("value");
-            if (siblingsSize != null) person.numberOfSiblings = Integer.valueOf(siblingsSize);
-        } else if ("firstname".equals(tag) || "first".equals(tag)) {
-            person.firstName = this.getAttributeAndBody("value");
-        } else if ("surname".equals(tag)) {
-            person.lastName = this.getAttribute("value");
-        } else if ("family".equals(tag) || "family-name".equals(tag)) {
-            person.lastName = this.readCharacters();
-        } else if ("gender".equals(tag)) {
-            person.isMale = this.defineGenderIsMale(this.getAttributeAndBody("value"));
-        } else if ("spouce".equals(tag)) {
-            String spouceName = this.getAttribute("value");
-            if (spouceName != null && !spouceName.equals("NONE")) {
-                String[] spouceNameParts = this.stringParts(spouceName);
-                person.spouce = new PersonFragment(spouceNameParts[0], spouceNameParts[1]);
-            }
-        } else if ("husband".equals(tag) || "wife".equals(tag)) {
-            person.spouce = new PersonFragment(this.getAttribute("value"));
-            if ("husband".equals(tag)) {
-                person.isMale = false;
-                person.spouce.isMale = true;
-            } else {
-                person.isMale = true;
-                person.spouce.isMale = false;
-            }
-        } else if ("son".equals(tag) || "daughter".equals(tag)) {
-            PersonFragment child = new PersonFragment(this.getAttribute("id"));
-            child.isMale = "son".equals(tag);
-            person.children.add(child);
-        } else if ("child".equals(tag)) {
-            String[] childNameParts = this.stringParts(this.readCharacters());
-            person.children.add(new PersonFragment(childNameParts[0], childNameParts[1]));
-        } else if ("siblings".equals(tag)) {
-            String siblingsIds = this.getAttribute("val");
-            if (siblingsIds != null) {
-                String[] idsParts = this.stringParts(siblingsIds);
-                for (String siblingId : idsParts) person.siblings.add(new PersonFragment(siblingId));
-            }
-        } else if ("brother".equals(tag) || "sister".equals(tag)) {
-            String[] siblingNameParts = this.stringParts(this.readCharacters());
-            PersonFragment sibling = new PersonFragment(siblingNameParts[0], siblingNameParts[1]);
-            sibling.isMale = "brother".equals(tag);
-            person.siblings.add(sibling);
-        } else if ("father".equals(tag) || "mother".equals(tag)) {
-            String[] parentNameParts = this.stringParts(this.readCharacters());
-            PersonFragment parent = new PersonFragment(parentNameParts[0], parentNameParts[1]);
-            parent.isMale = "father".equals(tag);
-            person.parents.add(parent);
-        } else if ("parent".equals(tag)) {
-            String parentId = this.getAttribute("value");
-            if (parentId != null && !parentId.equals("UNKNOWN")) {
-                person.parents.add(new PersonFragment(parentId));
-            }
+        switch (tag) {
+            case "person":
+                person.id = getAttribute("id");
+                parseFullName(getAttribute("name"), person);
+                break;
+            case "id":
+                person.id = getAttribute("value");
+                break;
+            case "firstname":
+            case "first":
+                person.firstName = getAttributeOrBody("value");
+                break;
+            case "surname":
+                person.lastName = getAttribute("value");
+                break;
+            case "family":
+            case "family-name":
+                person.lastName = readCharacters();
+                break;
+            case "children-number":
+                person.numberOfChildren = parseOptionalInt(getAttribute("value"));
+                break;
+            case "siblings-number":
+                person.numberOfSiblings = parseOptionalInt(getAttribute("value"));
+                break;
+            case "gender":
+                person.isMale = defineGender(getAttributeOrBody("value"));
+                break;
+            case "spouce":
+                parseSpouseByName(person);
+                break;
+            case "husband":
+            case "wife":
+                parseSpouseById(tag, person);
+                break;
+            case "son":
+            case "daughter":
+                parseChildById(tag, person);
+                break;
+            case "child":
+                parseChildByName(person);
+                break;
+            case "siblings":
+                parseSiblingsIds(person);
+                break;
+            case "brother":
+            case "sister":
+                parseSiblingByName(tag, person);
+                break;
+            case "father":
+            case "mother":
+                parseParentByName(tag, person);
+                break;
+            case "parent":
+                parseParentById(person);
+                break;
+        }
+    }
+
+    private void parseFullName(String fullname, PersonFragment person) {
+        if (fullname != null) {
+            String[] parts = stringParts(fullname);
+            person.firstName = parts[0];
+            person.lastName = parts[1];
+        }
+    }
+
+    private void parseSpouseByName(PersonFragment person) {
+        String name = getAttribute("value");
+        if (isKnown(name)) {
+            String[] parts = stringParts(name);
+            person.spouce = new PersonFragment(parts[0], parts[1]);
+        }
+    }
+
+    private void parseSpouseById(String tag, PersonFragment person) {
+        person.spouce = new PersonFragment(getAttribute("value"));
+        if ("husband".equals(tag)) {
+            person.isMale = false;
+            person.spouce.isMale = true;
+        } else {
+            person.isMale = true;
+            person.spouce.isMale = false;
+        }
+    }
+
+    private void parseChildById(String tag, PersonFragment person) {
+        PersonFragment child = new PersonFragment(getAttribute("id"));
+        child.isMale = "son".equals(tag);
+        person.children.add(child);
+    }
+
+    private void parseChildByName(PersonFragment person) throws XMLStreamException {
+        String[] parts = stringParts(readCharacters());
+        person.children.add(new PersonFragment(parts[0], parts[1]));
+    }
+
+    private void parseSiblingsIds(PersonFragment person) {
+        String siblingIds = getAttribute("val");
+        if (siblingIds != null) {
+            for (String id : stringParts(siblingIds)) person.siblings.add(new PersonFragment(id));
+        }
+    }
+
+    private void parseSiblingByName(String tag, PersonFragment person) throws XMLStreamException {
+        String[] siblingNameParts = stringParts(readCharacters());
+        PersonFragment sibling = new PersonFragment(siblingNameParts[0], siblingNameParts[1]);
+        sibling.isMale = "brother".equals(tag);
+        person.siblings.add(sibling);
+    }
+
+    private void parseParentByName(String tag, PersonFragment person) throws XMLStreamException {
+        String[] parentNameParts = stringParts(readCharacters());
+        PersonFragment parent = new PersonFragment(parentNameParts[0], parentNameParts[1]);
+        parent.isMale = "father".equals(tag);
+        person.parents.add(parent);
+    }
+
+    private void parseParentById(PersonFragment person) {
+        String id = getAttribute("value");
+        if (isKnown(id)) {
+            person.parents.add(new PersonFragment(id));
+        }
+    }
+
+    private boolean isKnown(String value) {
+        return value != null && !"UNKNOWN".equalsIgnoreCase(value) && !"NONE".equalsIgnoreCase(value);
+    }
+
+    private Integer parseOptionalInt(String value) {
+        try {
+            return (value != null) ? Integer.valueOf(value.trim()) : null;
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
@@ -114,12 +181,12 @@ public class XMLParser {
         return (result != null) ? result.trim() : null;
     }
 
-    private String getAttributeAndBody(String key) throws XMLStreamException {
+    private String getAttributeOrBody(String key) throws XMLStreamException {
         String value = this.getAttribute(key);
         return (value != null) ? value : this.readCharacters();
     }
 
-    private Boolean defineGenderIsMale(String info) {
+    private Boolean defineGender(String info) {
         if ("male".equals(info) || "M".equals(info)) {
             return true;
         } else if ("female".equals(info) || "F".equals(info)) {
