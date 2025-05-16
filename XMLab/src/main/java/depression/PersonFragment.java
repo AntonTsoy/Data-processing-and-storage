@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class PersonFragment {
     public String id;
     public String firstName;  // fullname: first, firstname, name (both names)
@@ -35,36 +36,6 @@ public class PersonFragment {
         this.firstName = firstName;
         this.lastName = lastname;
         initListFields();
-    }
-
-    public void mergeWith(PersonFragment other) {
-        if (other == null) return;
-
-        mergeField("id", this.id, other.id, val -> this.id = val);
-        mergeField("firstName", this.firstName, other.firstName, val -> this.firstName = val);
-        mergeField("lastName", this.lastName, other.lastName, val -> this.lastName = val);
-        mergeField("isMale", this.isMale, other.isMale, val -> this.isMale = val);
-        mergeField("numberOfChildren", this.numberOfChildren, other.numberOfChildren, val -> this.numberOfChildren = val);
-        mergeField("numberOfSiblings", this.numberOfSiblings, other.numberOfSiblings, val -> this.numberOfSiblings = val);
-
-        if (this.spouce != null) {
-            this.spouce.mergeWith(other.spouce);
-        }
-        this.parents.addAll(other.parents);
-        this.children.addAll(other.children);
-        this.siblings.addAll(other.siblings);
-    }
-
-    private <T> void mergeField(String fieldName, T current, T other, java.util.function.Consumer<T> setter) {
-        if (other == null) return;
-        if (current == null) {
-            setter.accept(other);
-        } else if (!current.equals(other)) {
-            System.out.println("Conflict in field '" + fieldName + "':");
-            System.out.println("First:  " + this);
-            System.out.println("Second: " + other);
-            throw new IllegalStateException("Conflicting field '" + fieldName + "' during merge.");
-        }
     }
 
     /*
