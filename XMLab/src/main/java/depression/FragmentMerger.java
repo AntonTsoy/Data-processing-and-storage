@@ -19,21 +19,40 @@ public class FragmentMerger {
     }
 
     public void structurePersonFragments() {
+        mergeUniqueNamedPersons();
+        try (PrintWriter writer = new PrintWriter(new FileWriter("new_id.txt"))) {
+            for (PersonFragment person : personsById.values()) {
+                writer.println(person);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
+    private void mergeUniqueNamedPersons() {
+        for (String fullname : fullNameIds.keySet()) {
+            if (fullNameIds.get(fullname).size() == 1 && namesakes.containsKey(fullname)) {
+                for (PersonFragment namesake : namesakes.get(fullname)) {
+                    namesake.id = fullNameIds.get(fullname).getFirst();
+                    traverseRelatives(namesake);
+                    recordIdentifiedPerson(namesake);
+                }
+                namesakes.remove(fullname);
+            }
+        }
     }
 
     public void appendPersonFragment(PersonFragment person) {
-        String fullname = null;
-        if (person.firstName != null && person.lastName != null) {
-            fullname = person.firstName + " " + person.lastName;
-        }
         if (person.id == null) {
+            String fullname = person.firstName + " " + person.lastName;
             namesakes.putIfAbsent(fullname, new ArrayList<>());
             namesakes.get(fullname).add(person);
         } else {
             traverseRelatives(person);
             recordIdentifiedPerson(person);
-            if (fullname != null) {
+            mergeWith(person, personsById.get(person.id));
+            if (person.firstName != null && person.lastName != null) {
+                String fullname = person.firstName + " " + person.lastName;
                 fullNameIds.putIfAbsent(fullname, new ArrayList<>());
                 List<String> currNameIds = fullNameIds.get(fullname);
                 if (!currNameIds.contains(person.id)) currNameIds.add(person.id);
@@ -47,6 +66,10 @@ public class FragmentMerger {
             person.spouce.numberOfChildren = person.numberOfChildren;
             recordIdentifiedPerson(person.spouce);
         }
+        for (PersonFragment parent : person.parents) {
+            parent.numberOfChildren = person.numberOfSiblings != null ? person.numberOfSiblings + 1 : null;
+            recordIdentifiedPerson(parent);
+        }
         for (PersonFragment child : person.children) {
             child.numberOfSiblings = person.numberOfChildren != null ? person.numberOfChildren - 1 : null;
             recordIdentifiedPerson(child);
@@ -54,10 +77,6 @@ public class FragmentMerger {
         for (PersonFragment sibling : person.siblings) {
             sibling.numberOfSiblings = person.numberOfSiblings;
             recordIdentifiedPerson(sibling);
-        }
-        for (PersonFragment parent : person.parents) {
-            parent.numberOfChildren = person.numberOfChildren != null ? person.numberOfSiblings + 1 : null;
-            recordIdentifiedPerson(parent);
         }
     }
 
@@ -83,7 +102,7 @@ public class FragmentMerger {
         }
     }
 
-    private boolean hasRelatives(PersonFragment person) {
+    private boolean hasNoRelatives(PersonFragment person) {
         return person.spouce == null && person.children.isEmpty() && person.parents.isEmpty() && person.siblings.isEmpty();
     }
 
@@ -132,7 +151,7 @@ public class FragmentMerger {
             List<PersonFragment> personsByName = namesakes.get(fullname);
             while (!personsByName.isEmpty()) {
                 PersonFragment currPerson = personsByName.getFirst();
-                if (!hasRelatives(currPerson)) {
+                if (hasNoRelatives(currPerson)) {
                     personsByName.remove(currPerson);
                 }
                 if (currPerson.isMale != null) {
