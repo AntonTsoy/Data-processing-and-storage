@@ -7,15 +7,15 @@ import java.util.List;
 
 public class PersonFragment {
     public String id;
-    public String firstName;  // fullname: first, firstname, name (both names)
-    public String lastName; // fullname: family, surname, family-name, name (both names)
+    public String firstName;
+    public String lastName;
     public Boolean isMale;
+    public Integer numberOfChildren;
+    public Integer numberOfSiblings;
     public PersonFragment spouce;
     public List<PersonFragment> parents;
     public List<PersonFragment> children;
     public List<PersonFragment> siblings;
-    public Integer numberOfChildren;
-    public Integer numberOfSiblings;
 
     private void initListFields() {
         this.parents = new ArrayList<>();
