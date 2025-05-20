@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class FragmentMerger {
@@ -20,15 +21,8 @@ public class FragmentMerger {
 
     public void structurePersonFragments() {
         mergeUniqueNamedPersons();
-        try (PrintWriter writer = new PrintWriter(new FileWriter("new_name.txt"))) {
-            for (List<PersonFragment> fullNamesakes : namesakes.values()) {
-                for (PersonFragment namesake : fullNamesakes) {
-                    if (!hasNoRelatives(namesake)) writer.println(namesake);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+        complexUnidentifiedMerge();
+        writePersonsInTxt("new_final_id.txt");
     }
 
     private void mergeUniqueNamedPersons() {
@@ -120,6 +114,8 @@ public class FragmentMerger {
 
         if (destination.spouce != null) {
             mergeWith(destination.spouce, source.spouce);
+        } else {
+            destination.spouce = source.spouce;
         }
         destination.parents.addAll(source.parents);
         destination.children.addAll(source.children);
@@ -140,8 +136,8 @@ public class FragmentMerger {
 
     private void writePersonsInTxt(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            for (String personId : personsById.keySet()) {
-                writer.println(personId);
+            for (PersonFragment person : personsById.values()) {
+                writer.println(person);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -150,11 +146,11 @@ public class FragmentMerger {
 
     private void complexUnidentifiedMerge() {
         for (String fullname : namesakes.keySet()) {
-            List<PersonFragment> personsByName = namesakes.get(fullname);
-            while (!personsByName.isEmpty()) {
-                PersonFragment currPerson = personsByName.getFirst();
+            for (int namesakeNum = 0; namesakeNum < namesakes.get(fullname).size(); namesakeNum++) {
+                PersonFragment currPerson = namesakes.get(fullname).get(namesakeNum);
                 if (hasNoRelatives(currPerson)) {
-                    personsByName.remove(currPerson);
+                    namesakes.get(fullname).remove(namesakeNum--);
+                    continue;
                 }
                 if (currPerson.isMale != null) {
                     List<String> candidates = new ArrayList<>(fullNameIds.get(fullname));
@@ -169,7 +165,7 @@ public class FragmentMerger {
                     if (candidates.size() == 1) {
                         PersonFragment realPerson = personsById.get(candidates.getFirst());
                         mergeWith(realPerson, currPerson);
-                        personsByName.remove(currPerson);
+                        namesakes.get(fullname).remove(namesakeNum--);
                         continue;
                     }
                 }
@@ -186,7 +182,7 @@ public class FragmentMerger {
                     if (candidates.size() == 1) {
                         PersonFragment realPerson = personsById.get(candidates.getFirst());
                         mergeWith(realPerson, currPerson);
-                        personsByName.remove(currPerson);
+                        namesakes.get(fullname).remove(namesakeNum--);
                         continue;
                     }
                 }
@@ -197,9 +193,10 @@ public class FragmentMerger {
                     }
                 }
                 if (!currPerson.children.isEmpty()) {
-                    PersonFragment child = currPerson.children.getFirst();
-                    if (child.numberOfSiblings != null) {
-                        currPerson.numberOfChildren = child.numberOfSiblings + 1;
+                    String childId = currPerson.children.getFirst().id;
+                    PersonFragment childPerson = personsById.get(childId);
+                    if (childPerson.numberOfSiblings != null) {
+                        currPerson.numberOfChildren = childPerson.numberOfSiblings + 1;
                     }
                 }
                 if (currPerson.numberOfChildren != null) {
@@ -215,14 +212,42 @@ public class FragmentMerger {
                     if (candidates.size() == 1) {
                         PersonFragment realPerson = personsById.get(candidates.getFirst());
                         mergeWith(realPerson, currPerson);
-                        personsByName.remove(currPerson);
+                        namesakes.get(fullname).remove(namesakeNum--);
                         continue;
                     }
                 }
-                System.out.println("Unidentified person: " + currPerson);
-                throw new IllegalStateException("Can't merge unidentified person with it ID instance");
+                for (PersonFragment parent : currPerson.parents) {
+                    if (parent.id == null) parent.id = fullNameIds.get(parent.firstName + " " + parent.lastName).getFirst();
+                    PersonFragment parentPerson = personsById.get(parent.id);
+                    Set<String> parentChildren = parentPerson.children
+                            .stream()
+                            .map(child -> child.id)
+                            .collect(Collectors.toCollection(HashSet::new));
+                    List<String> candidates = fullNameIds.get(fullname).stream().filter(parentChildren::contains).toList();
+                    if (candidates.size() == 1) {
+                        PersonFragment realPerson = personsById.get(candidates.getFirst());
+                        mergeWith(realPerson, currPerson);
+                        namesakes.get(fullname).remove(namesakeNum--);
+                        break;
+                    }
+                }
+                for (PersonFragment sibling : currPerson.siblings) {
+                    if (sibling.id == null) sibling.id = fullNameIds.get(sibling.firstName + " " + sibling.lastName).getFirst();
+                    PersonFragment siblingPerson = personsById.get(sibling.id);
+                    Set<String> siblingSiblings = siblingPerson.siblings
+                            .stream()
+                            .map(sib -> sib.id)
+                            .collect(Collectors.toCollection(HashSet::new));
+                    List<String> candidates = fullNameIds.get(fullname).stream().filter(siblingSiblings::contains).toList();
+                    if (candidates.size() == 1) {
+                        PersonFragment realPerson = personsById.get(candidates.getFirst());
+                        mergeWith(realPerson, currPerson);
+                        namesakes.get(fullname).remove(namesakeNum--);
+                        break;
+                    }
+                }
             }
         }
-        namesakes.clear();
+        namesakes.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 }

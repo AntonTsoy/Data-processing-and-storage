@@ -1,11 +1,11 @@
 firstName=Kaylene; lastName=Startz: [P406658, P411821] - (пол разный)
 firstName=Lurline; lastName=Trawick: [P405298, P389809] - (пол разный)
-firstName=Tonya; lastName=Loschiavo: [P385164, P390327] - (пол совпадает) <через супруга узнаем количество детей>
-firstName=Janeen; lastName=Robbinson: [P387807, P382644] - (пол разный) <через супруга узнаем количество детей - нужно чтобы было равенство><через parent узнаем количество сиблингов>
-firstName=Shemeka; lastName=Pilar: [P395948, P385622] - (пол совпадает) <через parent узнаем количество сиблингов>
-firstName=Tanika; lastName=Belstad: [P389754, P384591] - (пол разный) <через parent узнаем количество сиблингов>
-firstName=Madeline; lastName=Stoot: [P405249, P400086] - (пол разный) <через parent узнаем количество сиблингов>
-######
+firstName=Tonya; lastName=Loschiavo: [P385164, P390327] - (пол совпадает)
+firstName=Janeen; lastName=Robbinson: [P387807, P382644] - (пол разный)
+firstName=Shemeka; lastName=Pilar: [P395948, P385622] - (пол совпадает)
+firstName=Tanika; lastName=Belstad: [P389754, P384591] - (пол разный)
+firstName=Madeline; lastName=Stoot: [P405249, P400086] - (пол разный)
+###### персоны выше упоминаются как родственники по имени
 firstName=Oscar; lastName=Silvester: [P399670, P384181]
 firstName=Miki; lastName=Whyel: [P380954, P396443]
 firstName=Orlando; lastName=Pennison: [P379691, P390017]
