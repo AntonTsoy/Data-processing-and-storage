@@ -20,9 +20,11 @@ public class FragmentMerger {
 
     public void structurePersonFragments() {
         mergeUniqueNamedPersons();
-        try (PrintWriter writer = new PrintWriter(new FileWriter("new_id.txt"))) {
-            for (PersonFragment person : personsById.values()) {
-                writer.println(person);
+        try (PrintWriter writer = new PrintWriter(new FileWriter("new_name.txt"))) {
+            for (List<PersonFragment> fullNamesakes : namesakes.values()) {
+                for (PersonFragment namesake : fullNamesakes) {
+                    if (!hasNoRelatives(namesake)) writer.println(namesake);
+                }
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -171,18 +173,12 @@ public class FragmentMerger {
                         continue;
                     }
                 }
-                if (currPerson.spouce != null && currPerson.spouce.id != null) {
-                    PersonFragment spoucePerson = personsById.get(currPerson.spouce.id);
-                    if (spoucePerson.numberOfChildren != null) {
-                        currPerson.numberOfChildren = spoucePerson.numberOfChildren;
-                    }
-                }
-                if (currPerson.numberOfChildren != null) {
+                if (currPerson.numberOfSiblings != null) {
                     List<String> candidates = new ArrayList<>(fullNameIds.get(fullname));
                     for (int i = 0; i < candidates.size(); i++) {
                         String candidateId = candidates.get(i);
                         PersonFragment candidatePerson = personsById.get(candidateId);
-                        if (candidatePerson.numberOfChildren != null && !candidatePerson.numberOfChildren.equals(currPerson.numberOfChildren)) {
+                        if (candidatePerson.numberOfSiblings != null && !candidatePerson.numberOfSiblings.equals(currPerson.numberOfSiblings)) {
                             candidates.remove(candidateId);
                             i--;
                         }
@@ -194,13 +190,24 @@ public class FragmentMerger {
                         continue;
                     }
                 }
-                if (!currPerson.siblings.isEmpty()) {
-                    currPerson.numberOfSiblings = currPerson.siblings.size();
+                if (currPerson.spouce != null && currPerson.spouce.id != null) {
+                    PersonFragment spoucePerson = personsById.get(currPerson.spouce.id);
+                    if (spoucePerson.numberOfChildren != null) {
+                        currPerson.numberOfChildren = spoucePerson.numberOfChildren;
+                    }
+                }
+                if (!currPerson.children.isEmpty()) {
+                    PersonFragment child = currPerson.children.getFirst();
+                    if (child.numberOfSiblings != null) {
+                        currPerson.numberOfChildren = child.numberOfSiblings + 1;
+                    }
+                }
+                if (currPerson.numberOfChildren != null) {
                     List<String> candidates = new ArrayList<>(fullNameIds.get(fullname));
                     for (int i = 0; i < candidates.size(); i++) {
                         String candidateId = candidates.get(i);
                         PersonFragment candidatePerson = personsById.get(candidateId);
-                        if (candidatePerson.numberOfSiblings != null && !candidatePerson.numberOfSiblings.equals(currPerson.numberOfSiblings)) {
+                        if (candidatePerson.numberOfChildren != null && !candidatePerson.numberOfChildren.equals(currPerson.numberOfChildren)) {
                             candidates.remove(candidateId);
                             i--;
                         }
