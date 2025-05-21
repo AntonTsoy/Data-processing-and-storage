@@ -15,5 +15,6 @@ public class Main {
         }
         parser.close();
         resolver.structurePersonFragments();
+
     }
 }

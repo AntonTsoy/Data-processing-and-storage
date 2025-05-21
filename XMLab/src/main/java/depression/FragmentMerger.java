@@ -19,10 +19,14 @@ public class FragmentMerger {
         this.fullNameIds = new HashMap<>();
     }
 
+    public List<Person> getPersons() {
+        return new ArrayList<>();
+    }
+
     public void structurePersonFragments() {
         mergeUniqueNamedPersons();
         complexUnidentifiedMerge();
-        writePersonsInTxt("new_final_id.txt");
+        writePersonsInTxt("people_final_id.txt");
     }
 
     private void mergeUniqueNamedPersons() {
