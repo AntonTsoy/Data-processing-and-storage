@@ -51,4 +51,11 @@ public class Person {
     @XmlElement(name = "sisterId")
     @XmlIDREF
     public List<Person> sisters;
+
+    public Person(PersonFragment basePerson) {
+        this.id = basePerson.id;
+        this.firstName = basePerson.firstName;
+        this.lastName = basePerson.lastName;
+        this.isMale = basePerson.isMale;
+    }
 }
