@@ -28,7 +28,7 @@ public class Person {
     @XmlIDREF
     public Person mother;
 
-    @XmlElement(name = "spouceId")
+    @XmlElement(name = "spouseId")
     @XmlIDREF
     public Person spouce;
 

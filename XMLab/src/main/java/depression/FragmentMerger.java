@@ -55,8 +55,8 @@ public class FragmentMerger {
                         sisters.add(realSibling);
                     }
                 }
-                if (!brothers.isEmpty()) realPerson.sons = brothers;
-                if (!sisters.isEmpty()) realPerson.daughters = sisters;
+                if (!brothers.isEmpty()) realPerson.brothers = brothers;
+                if (!sisters.isEmpty()) realPerson.sisters = sisters;
             }
             for (PersonFragment parent : person.parents) {
                 Person realParent = resultPersonsById.get(parent.id);

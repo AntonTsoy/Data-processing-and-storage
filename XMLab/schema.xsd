@@ -16,7 +16,7 @@
             <xs:element name="isMale" type="xs:boolean"/>
             <xs:element name="fatherId" type="xs:IDREF" minOccurs="0"/>
             <xs:element name="motherId" type="xs:IDREF" minOccurs="0"/>
-            <xs:element name="spouceId" type="xs:IDREF" minOccurs="0"/>
+            <xs:element name="spouseId" type="xs:IDREF" minOccurs="0"/>
 
             <xs:element name="sons" minOccurs="0">
                 <xs:complexType>
