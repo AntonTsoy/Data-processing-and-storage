@@ -5,7 +5,7 @@ import java.io.IOException;
 
 
 public class Main {
-    public static void main(String[] args) throws XMLStreamException, IOException, IllegalAccessException {
+    public static void main(String[] args) throws Exception {
         XMLParser parser = new XMLParser("people.xml");
         FragmentMerger resolver = new FragmentMerger();
         PersonFragment person = parser.parsePersonFragment();
@@ -15,6 +15,6 @@ public class Main {
         }
         parser.close();
         resolver.structurePersonFragments();
-
+        XMLUtils.marshalPeople(resolver.getPersons(), "schema.xsd", "result.xml");
     }
 }

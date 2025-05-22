@@ -52,6 +52,8 @@ public class Person {
     @XmlIDREF
     public List<Person> sisters;
 
+    public Person() {}
+
     public Person(PersonFragment basePerson) {
         this.id = basePerson.id;
         this.firstName = basePerson.firstName;

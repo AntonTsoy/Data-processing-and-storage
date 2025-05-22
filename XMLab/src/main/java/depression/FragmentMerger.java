@@ -23,17 +23,56 @@ public class FragmentMerger {
         Map<String, Person> resultPersonsById = new HashMap<>();
         for (PersonFragment person : personsById.values()) {
             resultPersonsById.put(person.id, new Person(person));
-
+            identifyAllRelatives(person);
         }
-        List<Person> resultPersons = new ArrayList<>();
-        for (;;) {}
-        return resultPersons;
+        for (Person realPerson : resultPersonsById.values()) {
+            PersonFragment person = personsById.get(realPerson.id);
+            if (person.spouce != null) {
+                realPerson.spouce = resultPersonsById.get(person.spouce.id);
+            }
+            if (!person.children.isEmpty()) {
+                List<Person> sons = new ArrayList<>();
+                List<Person> daughters = new ArrayList<>();
+                for (PersonFragment child : person.children) {
+                    Person realChild = resultPersonsById.get(child.id);
+                    if (realChild.isMale && !sons.contains(realChild)) {
+                        sons.add(realChild);
+                    } else if (!realChild.isMale && !daughters.contains(realChild)) {
+                        daughters.add(realChild);
+                    }
+                }
+                if (!sons.isEmpty()) realPerson.sons = sons;
+                if (!daughters.isEmpty()) realPerson.daughters = daughters;
+            }
+            if (!person.siblings.isEmpty()) {
+                List<Person> brothers = new ArrayList<>();
+                List<Person> sisters = new ArrayList<>();
+                for (PersonFragment sibling : person.siblings) {
+                    Person realSibling = resultPersonsById.get(sibling.id);
+                    if (realSibling.isMale && !brothers.contains(realSibling)) {
+                        brothers.add(realSibling);
+                    } else if (!realSibling.isMale && !sisters.contains(realSibling)) {
+                        sisters.add(realSibling);
+                    }
+                }
+                if (!brothers.isEmpty()) realPerson.sons = brothers;
+                if (!sisters.isEmpty()) realPerson.daughters = sisters;
+            }
+            for (PersonFragment parent : person.parents) {
+                Person realParent = resultPersonsById.get(parent.id);
+                if (realParent.isMale && realPerson.father == null) {
+                    realPerson.father = realParent;
+                } else if (!realParent.isMale && realPerson.mother == null) {
+                    realPerson.mother = realParent;
+                }
+            }
+        }
+        return new ArrayList<>(resultPersonsById.values());
     }
 
     public void structurePersonFragments() {
         mergeUniqueNamedPersons();
         complexUnidentifiedMerge();
-        writePersonsInTxt("people_final_id.txt");
     }
 
     private void mergeUniqueNamedPersons() {
@@ -264,30 +303,72 @@ public class FragmentMerger {
 
     private void identifyAllRelatives(PersonFragment person) {
         for (PersonFragment child : person.children) {
-            if (child.id == null && !differPersonAndRelative(person, child)) {
+            findPersonIdByUniqueName(child);
+            if (child.id == null && differsPersonAndRelativeName(person, child)) {
                 String fullname = child.firstName + " " + child.lastName;
                 for (String candidateId : fullNameIds.get(fullname)) {
                     for (PersonFragment candidateParent : personsById.get(candidateId).parents) {
                         findPersonIdByUniqueName(candidateParent);
                         if (candidateParent.id.equals(person.id)) {
                             child.id = candidateId;
+                            break;
                         }
+                    }
+                    if (child.id != null) {
+                        break;
                     }
                 }
             }
         }
         for (PersonFragment parent : person.parents) {
-
+            findPersonIdByUniqueName(parent);
+            if (parent.id == null && differsPersonAndRelativeName(person, parent)) {
+                String fullname = parent.firstName + " " + parent.lastName;
+                for (String candidateId : fullNameIds.get(fullname)) {
+                    for (PersonFragment candidateChild : personsById.get(candidateId).children) {
+                        findPersonIdByUniqueName(candidateChild);
+                        if (candidateChild.id.equals(person.id)) {
+                            parent.id = candidateId;
+                            break;
+                        }
+                    }
+                    if (parent.id != null) {
+                        break;
+                    }
+                }
+            }
         }
-    }
-
-    private void helper(PersonFragment person, PersonFragment child) {
-        String fullname = child.firstName + " " + child.lastName;
-        for (String candidateId : fullNameIds.get(fullname)) {
-            for (PersonFragment candidateParent : personsById.get(candidateId).parents) {
-                findPersonIdByUniqueName(candidateParent);
-                if (candidateParent.id.equals(person.id)) {
-                    child.id = candidateId;
+        for (PersonFragment sibling : person.siblings) {
+            findPersonIdByUniqueName(sibling);
+            if (sibling.id == null && differsPersonAndRelativeName(person, sibling)) {
+                String fullname = sibling.firstName + " " + sibling.lastName;
+                for (String candidateId : fullNameIds.get(fullname)) {
+                    for (PersonFragment candidateSibling : personsById.get(candidateId).siblings) {
+                        findPersonIdByUniqueName(candidateSibling);
+                        if (candidateSibling.id.equals(person.id)) {
+                            sibling.id = candidateId;
+                            break;
+                        }
+                    }
+                    if (sibling.id != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (person.spouce != null) {
+            findPersonIdByUniqueName(person.spouce);
+            if (person.spouce.id == null && differsPersonAndRelativeName(person, person.spouce)) {
+                String fullname = person.spouce.firstName + " " + person.spouce.lastName;
+                for (String candidateId : fullNameIds.get(fullname)) {
+                    PersonFragment candidateSpouce = personsById.get(candidateId).spouce;
+                    if (candidateSpouce != null) {
+                        findPersonIdByUniqueName(candidateSpouce);
+                        if (candidateSpouce.id.equals(person.id)) {
+                            person.spouce.id = candidateId;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -302,8 +383,8 @@ public class FragmentMerger {
         }
     }
 
-    private boolean differPersonAndRelative(PersonFragment person, PersonFragment relative) {
-        if (person.id == null) return false;
+    private boolean differsPersonAndRelativeName(PersonFragment person, PersonFragment relative) {
+        if (person.id == null) return true;
         if (relative.id == null) {
             if (relative.firstName.equals(person.firstName) && relative.lastName.equals(person.lastName)) {
                 String fullname = person.firstName + " " + person.lastName;
@@ -311,9 +392,9 @@ public class FragmentMerger {
                 candidateIds.remove(person.id);
                 relative.id = candidateIds.getFirst();
             } else {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }
